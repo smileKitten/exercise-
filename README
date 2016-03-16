@@ -1,0 +1,39 @@
+Excersie Description:
+
+https://www.thumbtack.com/challenges/simple-database
+
+
+--------------------------------------------------------------------------------
+Design Doc:
+
+In reality, Database will only updated when transection COMMIT. Since this 
+simply Database is a single-threaded and a little amount of updated, to
+eliminate the amount of memory using each transection. My solution is only 
+cache the modified variables, and keep the Database up-to-date. It is much 
+easier for the COMMIT operation. 
+
+Database has a __db map to store the current db state; __history is a list of 
+transection history; __db_val is a map that map val to its occurrence, it is
+used to comply the O(log n) requirement for command NUMEQUALTO, now the comman
+is actually O(1), using addictional memory for speed up.
+
+Database will updated after every data command, however if there is a 
+transection occur, Database will cache the {name : val} to __history before
+made actual modification, (SET OR UNSET). and __db_val will updated accordingly.
+Both SET OR UNSET will have time complexity of O(1).
+
+When GET occur, Database simply return __db[name]. Notice here used exception
+handling to avoid check condiction and extra lookup, cleaner code and good 
+readabilty. It is easier to ask for forgiveness than permission. Time complexity 
+is O(1).
+
+When BEGIN occur, just simply append an empty map to the end of __history. Time
+complexity is O(1).
+
+When ROLLBACK occur if __history is empty, meaning there is no transection. 
+else Database will updated according to the last transection history, 
+the last element of __history; and __db_val will updated accordingly.
+
+When COMMIT occur if __history is empty, meaning there is no transection. else
+just clear the __history, because the db is most recent state. 
+
